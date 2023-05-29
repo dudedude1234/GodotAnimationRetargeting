@@ -14,6 +14,7 @@ enum {
 
 enum {
 	SOURCE_RIG_CUSTOM,
+	SOURCE_RIG_MOCAPONLINE,
 	SOURCE_RIG_RIGIFY2,
 	SOURCE_RIG_GENESIS3AND8,
 	SOURCE_RIG_3DSMAX,
@@ -61,8 +62,8 @@ export(String, DIR) var animation_export_directory  = "res://" setget set_export
 export(String) var animation_rename_prefix = "" setget set_animation_rename_prefix, get_animation_rename_prefix
 export(String) var animation_rename_suffix = "" setget set_animation_rename_suffix, get_animation_rename_suffix
 
-export(int, "custom", "placeholder", "genesis3and8", "placeholder", "placeholder") var source_rig_type = SOURCE_RIG_CUSTOM setget set_source_rig_type, get_source_rig_type
-export(int, "custom", "placeholder", "genesis3and8", "placeholder", "placeholder") var target_rig_type = TARGET_RIG_CUSTOM setget set_target_rig_type, get_target_rig_type
+export(int, "custom", "mocaponline", "placeholder", "genesis3and8", "placeholder", "placeholder") var source_rig_type = SOURCE_RIG_CUSTOM setget set_source_rig_type, get_source_rig_type
+export(int, "custom", "placeholder", "genesis3and8", "placeholder", "makehuman") var target_rig_type = TARGET_RIG_CUSTOM setget set_target_rig_type, get_target_rig_type
 
 export(Dictionary) var custom_bone_mapping = {} setget set_custom_bone_mapping, get_custom_bone_mapping
 export(Array) var ignore_bones = []
@@ -662,7 +663,6 @@ var correction_mode = CORRECTION_MODE_DISABLED
 var keep_transform_bones : Dictionary = {}
 var rigify2_bone_mapping : Dictionary = {}
 var max3ds_bone_mapping : Dictionary = {}
-var makehuman_bone_mapping : Dictionary = {}
 
 
 var genesis3and8_bone_mapping = {
@@ -737,4 +737,145 @@ var genesis3and8_bone_mapping = {
 	"rPinky1" : "f_pinky.01.R",
 	"rPinky2" : "f_pinky.02.R",
 	"rPinky3" : "f_pinky.03.R"
+	}
+	
+var makehuman_bone_mapping = {
+	"pelvis" : "pelvis",
+	
+	"abdomenLower" : "spine",
+	"abdomenUpper" : "spine_01",
+	"chestLower" : "spine_02",
+	"chestUpper" : "spine_03",
+	"neckLower" : "neck",
+	"head" : "head", 
+	
+	"lCollar" : "clavicle_l",
+	"lShldrBend" : "upperarm_l", 
+	"lForearmBend" : "forearm_l",
+	"lHand" : "hand_l",
+
+	"rCollar" : "clavicle_r",
+	"rShldrBend" : "upperarm_r",
+	"rForearmBend" : "forearm_r",
+	"rHand" : "hand_r",
+
+	"lThighBend" : "thigh_l",
+	"lShin" : "calf_l",
+	"lFoot" : "foot_l", 
+	"lToe" : "ball_l",
+
+	"rThighBend" : "thigh_r",
+	"rShin" : "calf_r",
+	"rFoot" : "foot_r", 
+	"rToe" : "ball_r",
+
+	"lThumb1" : "thumb_01_l",
+	"lThumb2" : "thumb_02_l",
+	"lThumb3" : "thumb_03_l",
+
+	"lIndex1" : "index_01_l",
+	"lIndex2" : "index_02_l",
+	"lIndex3" : "index_03_l",
+
+	"lMid1" : "middle_01_l",
+	"lMid2" : "middle_02_l",
+	"lMid3" : "middle_03_l",
+
+	"lRing1" : "ring_01_l",
+	"lRing2" : "ring_02_l",
+	"lRing3" : "ring_03_l",
+
+	"lPinky1" : "pinky_01_l",
+	"lPinky2" : "pinky_02_l",
+	"lPinky3" : "pinky_03_l",	
+
+	"rThumb1" : "thumb_01_r",
+	"rThumb2" : "thumb_02_r",
+	"rThumb3" : "thumb.03_r",
+
+	"rIndex1" : "index_01_r",
+	"rIndex2" : "index_02_r",
+	"rIndex3" : "index_03_r",
+
+	"rMid1" : "middle_01_r",
+	"rMid2" : "middle_02_r",
+	"rMid3" : "middle_03_r",
+
+	"rRing1" : "ring_01_r",
+	"rRing2" : "ring_02_r",
+	"rRing3" : "ring_03_r",
+
+	"rPinky1" : "pinky_01_r",
+	"rPinky2" : "pinky_02_r",
+	"rPinky3" : "pinky_03_r"
+	}
+	
+var mocaponline_bone_mapping = {
+	"hip" : "Hips",
+	
+	"abdomenLower" : "Spine",
+	"abdomenUpper" : "Spine1",
+	"chestLower" : "Spine2",
+	"neckLower" : "Neck",
+	"head" : "Head", 
+	
+	"lCollar" : "LeftShoulder",
+	"lShldrBend" : "LeftArm", 
+	"lForearmBend" : "LeftForeArm",
+	"lHand" : "LeftHand",
+
+	"rCollar" : "RightShoulder",
+	"rShldrBend" : "RightArm",
+	"rForearmBend" : "RightForeArm",
+	"rHand" : "RightHand",
+
+	"lThighBend" : "LeftUpLeg",
+	"lShin" : "LeftLeg",
+	"lFoot" : "LeftFoot", 
+	"lToe" : "LeftToeBase",
+
+	"rThighBend" : "RightUpLeg",
+	"rShin" : "RightLeg",
+	"rFoot" : "RightFoot", 
+	"rToe" : "RightToeBase",
+
+	"lThumb1" : "LeftHandThumb1",
+	"lThumb2" : "LeftHandThumb2",
+	"lThumb3" : "LeftHandThumb3",
+
+	"lIndex1" : "LeftHandIndex1",
+	"lIndex2" : "LeftHandIndex2",
+	"lIndex3" : "LeftHandIndex3",
+
+	"lMid1" : "LeftHandMiddle1",
+	"lMid2" : "LeftHandMiddle2",
+	"lMid3" : "LeftHandMiddle3",
+
+	"lRing1" : "LeftHandRing1",
+	"lRing2" : "LeftHandRing2",
+	"lRing3" : "LeftHandRing3",
+
+	"lPinky1" : "LeftHandPinky1",
+	"lPinky2" : "LeftHandPinky2",
+	"lPinky3" : "LeftHandPinky3",	
+
+	"rThumb1" : "RightHandThumb1",
+	"rThumb2" : "RightHandIndex2",
+	"rThumb3" : "RightHandIndex3",
+
+	"rIndex1" : "RightHandIndex1",
+	"rIndex2" : "RightHandIndex2",
+	"rIndex3" : "RightHandIndex3",
+
+	"rMid1" : "RightHandMiddle1",
+	"rMid2" : "RightHandMiddle2",
+	"rMid3" : "RightHandMiddle3",
+
+	"rRing1" : "RightHandRing1",
+	"rRing2" : "RightHandRing2",
+	"rRing3" : "RightHandRing3",
+
+	"rPinky1" : "RightHandPinky1",
+	"rPinky2" : "RightHandPinky2",
+	"rPinky3" : "RightHandPinky3"
 	}
