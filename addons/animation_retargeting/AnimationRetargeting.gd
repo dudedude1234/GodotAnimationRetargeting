@@ -23,6 +23,7 @@ enum {
 
 enum {
 	TARGET_RIG_CUSTOM,
+	TARGET_RIG_MBLAB,
 	TARGET_RIG_RIGIFY2,
 	TARGET_RIG_GENESIS3AND8,
 	TARGET_RIG_3DSMAX,
@@ -62,8 +63,8 @@ export(String, DIR) var animation_export_directory  = "res://" setget set_export
 export(String) var animation_rename_prefix = "" setget set_animation_rename_prefix, get_animation_rename_prefix
 export(String) var animation_rename_suffix = "" setget set_animation_rename_suffix, get_animation_rename_suffix
 
-export(int, "custom", "mocaponline", "placeholder", "genesis3and8", "placeholder", "placeholder") var source_rig_type = SOURCE_RIG_CUSTOM setget set_source_rig_type, get_source_rig_type
-export(int, "custom", "placeholder", "genesis3and8", "placeholder", "makehuman") var target_rig_type = TARGET_RIG_CUSTOM setget set_target_rig_type, get_target_rig_type
+export(int, "custom", "mocaponline", "genesis3and8", "max3ds", "placeholder") var source_rig_type = SOURCE_RIG_CUSTOM setget set_source_rig_type, get_source_rig_type
+export(int, "custom", "mblab", "rigify", "genesis3and8", "max3ds", "makehuman") var target_rig_type = TARGET_RIG_CUSTOM setget set_target_rig_type, get_target_rig_type
 
 export(Dictionary) var custom_bone_mapping = {} setget set_custom_bone_mapping, get_custom_bone_mapping
 export(Array) var ignore_bones = []
@@ -300,8 +301,14 @@ func _add_missing_bones_in_animation_track(p_new_retargeted_animation : Animatio
 	if target_rig_type == TARGET_RIG_CUSTOM and not custom_bone_mapping.empty():
 		bone_keys = custom_bone_mapping.values()
 	
+	if target_rig_type == TARGET_RIG_MBLAB:
+		bone_keys = mblab_bone_mapping.keys()
+	if target_rig_type == TARGET_RIG_RIGIFY2:
+		bone_keys = rigify2_bone_mapping.keys()
 	if target_rig_type == TARGET_RIG_GENESIS3AND8:
 		bone_keys = genesis3and8_bone_mapping.keys()
+	if target_rig_type == TARGET_RIG_MAKEHUMAN:
+		bone_keys = makehuman_bone_mapping.keys()
 	
 	var found_bone_track : bool = false
 	var _searching_bone_name : String = ""
@@ -393,6 +400,9 @@ func _retarget_animation_track(p_source_animation : Animation) -> Animation:
 		
 		if target_rig_type == TARGET_RIG_CUSTOM and not custom_bone_mapping.empty():
 			if not b in custom_bone_mapping.values():
+				continue
+		elif target_rig_type == TARGET_RIG_MBLAB:
+			if not mblab_bone_mapping.has(b):
 				continue
 		elif target_rig_type == TARGET_RIG_RIGIFY2:
 			if not rigify2_bone_mapping.has(b):
@@ -661,9 +671,234 @@ var _calculate_retargeting_data : bool = true
 var correction_mode = CORRECTION_MODE_DISABLED
 
 var keep_transform_bones : Dictionary = {}
-var rigify2_bone_mapping : Dictionary = {}
+var rigify2_bone_mapping = {
+	"hip" : "hips",
+	"pelvis" : "pelvis",
+	
+	"abdomenLower" : "spine",
+	"abdomenUpper" : "spine-1",
+	"chestLower" : "chest",
+	"chestUpper" : "chestUpper",
+	"neckLower" : "neck",
+	"neckUpper" : "neckUpper", 
+	"head" : "head", 
+	
+	"lCollar" : "shoulder.L",
+	"lShldrBend" : "upper_arm.L", 
+	"lForearmBend" : "forearm.L",
+	"lHand" : "hand.L",
+
+	"rCollar" : "shoulder.R",
+	"rShldrBend" : "upper_arm.R",
+	"rForearmBend" : "forearm.R",
+	"rHand" : "hand.R",
+
+	"lThighBend" : "thigh.L",
+	"lThighTwist" : "thigh_twist.L",
+	"lShin" : "shin.L",
+	"lFoot" : "foot.L", 
+	"lToe" : "toe.L",
+
+	"rThighBend" : "thigh.R",
+	"rShin" : "shin.R",
+	"rFoot" : "foot.R", 
+	"rToe" : "toe.R",
+
+	"lThumb1" : "f_thumb.01.L",
+	"lThumb2" : "f_thumb.02.L",
+	"lThumb3" : "f_thumb.03.L",
+
+	"lIndex1" : "f_index.01.L",
+	"lIndex2" : "f_index.02.L",
+	"lIndex3" : "f_index.03.L",
+
+	"lMid1" : "f_middle.01.L",
+	"lMid2" : "f_middle.02.L",
+	"lMid3" : "f_middle.03.L",
+
+	"lRing1" : "f_ring.01.L",
+	"lRing2" : "f_ring.02.L",
+	"lRing3" : "f_ring.03.L",
+
+	"lPinky1" : "f_pinky.01.L",
+	"lPinky2" : "f_pinky.02.L",
+	"lPinky3" : "f_pinky.03.L",	
+
+	"rThumb1" : "f_thumb.01.R",
+	"rThumb2" : "f_thumb.02.R",
+	"rThumb3" : "f_thumb.03.R",
+
+	"rIndex1" : "f_index.01.R",
+	"rIndex2" : "f_index.02.R",
+	"rIndex3" : "f_index.03.R",
+
+	"rMid1" : "f_middle.01.R",
+	"rMid2" : "f_middle.02.R",
+	"rMid3" : "f_middle.03.R",
+
+	"rRing1" : "f_ring.01.R",
+	"rRing2" : "f_ring.02.R",
+	"rRing3" : "f_ring.03.R",
+
+	"rPinky1" : "f_pinky.01.R",
+	"rPinky2" : "f_pinky.02.R",
+	"rPinky3" : "f_pinky.03.R"
+	}
 var max3ds_bone_mapping : Dictionary = {}
 
+var mocaponline_bone_mapping = {
+	"hip" : "Hips",
+	
+	"abdomenLower" : "Spine",
+	"abdomenUpper" : "Spine1",
+	"chestLower" : "Spine2",
+	"neckLower" : "Neck",
+	"head" : "Head", 
+	
+	"lCollar" : "LeftShoulder",
+	"lShldrBend" : "LeftArm", 
+	"lForearmBend" : "LeftForeArm",
+	"lHand" : "LeftHand",
+
+	"rCollar" : "RightShoulder",
+	"rShldrBend" : "RightArm",
+	"rForearmBend" : "RightForeArm",
+	"rHand" : "RightHand",
+
+	"lThighBend" : "LeftUpLeg",
+	"lShin" : "LeftLeg",
+	"lFoot" : "LeftFoot", 
+	"lToe" : "LeftToeBase",
+
+	"rThighBend" : "RightUpLeg",
+	"rShin" : "RightLeg",
+	"rFoot" : "RightFoot", 
+	"rToe" : "RightToeBase",
+
+	"lThumb1" : "LeftHandThumb1",
+	"lThumb2" : "LeftHandThumb2",
+	"lThumb3" : "LeftHandThumb3",
+	"lThumb4" : "LeftHandThumb4",
+
+	"lIndex1" : "LeftHandIndex1",
+	"lIndex2" : "LeftHandIndex2",
+	"lIndex3" : "LeftHandIndex3",
+	"lIndex4" : "LeftHandIndex4",
+
+	"lMid1" : "LeftHandMiddle1",
+	"lMid2" : "LeftHandMiddle2",
+	"lMid3" : "LeftHandMiddle3",
+	"lMid4" : "LeftHandMiddle4",
+
+	"lRing1" : "LeftHandRing1",
+	"lRing2" : "LeftHandRing2",
+	"lRing3" : "LeftHandRing3",
+	"lRing4" : "LeftHandRing4",
+
+	"lPinky1" : "LeftHandPinky1",
+	"lPinky2" : "LeftHandPinky2",
+	"lPinky3" : "LeftHandPinky3",	
+	"lPinky4" : "LeftHandPinky4",	
+
+	"rThumb1" : "f_thumb.01.R",
+	"rThumb2" : "f_thumb.02.R",
+	"rThumb3" : "f_thumb.03.R",
+	"rThumb4" : "f_thumb.03.R",
+
+	"rIndex1" : "RightHandIndex1",
+	"rIndex2" : "RightHandIndex2",
+	"rIndex3" : "RightHandIndex3",
+	"rIndex4" : "RightHandIndex4",
+
+	"rMid1" : "RightHandMiddle1",
+	"rMid2" : "RightHandMiddle2",
+	"rMid3" : "RightHandMiddle3",
+	"rMid4" : "RightHandMiddle4",
+
+	"rRing1" : "RightHandRing1",
+	"rRing2" : "RightHandRing2",
+	"rRing3" : "RightHandRing3",
+	"rRing4" : "RightHandRing4",
+
+	"rPinky1" : "RightHandPinky1",
+	"rPinky2" : "RightHandPinky2",
+	"rPinky3" : "RightHandPinky3",
+	"rPinky4" : "RightHandPinky4"
+	}
+	
+var mblab_bone_mapping = {
+	"hip" : "hips",
+	"pelvis" : "pelvis",
+	
+	"abdomenLower" : "spine",
+	"abdomenUpper" : "spine-1",
+	"chestLower" : "chest",
+	"chestUpper" : "chestUpper",
+	"neckLower" : "neck",
+	"neckUpper" : "neckUpper", 
+	"head" : "head", 
+	
+	"lCollar" : "shoulder.L",
+	"lShldrBend" : "upper_arm.L", 
+	"lForearmBend" : "forearm.L",
+	"lHand" : "hand.L",
+
+	"rCollar" : "shoulder.R",
+	"rShldrBend" : "upper_arm.R",
+	"rForearmBend" : "forearm.R",
+	"rHand" : "hand.R",
+
+	"lThighBend" : "thigh.L",
+	"lThighTwist" : "thigh_twist.L",
+	"lShin" : "shin.L",
+	"lFoot" : "foot.L", 
+	"lToe" : "toe.L",
+
+	"rThighBend" : "thigh.R",
+	"rShin" : "shin.R",
+	"rFoot" : "foot.R", 
+	"rToe" : "toe.R",
+
+	"lThumb1" : "f_thumb.01.L",
+	"lThumb2" : "f_thumb.02.L",
+	"lThumb3" : "f_thumb.03.L",
+
+	"lIndex1" : "f_index.01.L",
+	"lIndex2" : "f_index.02.L",
+	"lIndex3" : "f_index.03.L",
+
+	"lMid1" : "f_middle.01.L",
+	"lMid2" : "f_middle.02.L",
+	"lMid3" : "f_middle.03.L",
+
+	"lRing1" : "f_ring.01.L",
+	"lRing2" : "f_ring.02.L",
+	"lRing3" : "f_ring.03.L",
+
+	"lPinky1" : "f_pinky.01.L",
+	"lPinky2" : "f_pinky.02.L",
+	"lPinky3" : "f_pinky.03.L",	
+
+	"rThumb1" : "f_thumb.01.R",
+	"rThumb2" : "f_thumb.02.R",
+	"rThumb3" : "f_thumb.03.R",
+
+	"rIndex1" : "f_index.01.R",
+	"rIndex2" : "f_index.02.R",
+	"rIndex3" : "f_index.03.R",
+
+	"rMid1" : "f_middle.01.R",
+	"rMid2" : "f_middle.02.R",
+	"rMid3" : "f_middle.03.R",
+
+	"rRing1" : "f_ring.01.R",
+	"rRing2" : "f_ring.02.R",
+	"rRing3" : "f_ring.03.R",
+
+	"rPinky1" : "f_pinky.01.R",
+	"rPinky2" : "f_pinky.02.R",
+	"rPinky3" : "f_pinky.03.R"
+	}
 
 var genesis3and8_bone_mapping = {
 	"hip" : "hips",
@@ -739,7 +974,7 @@ var genesis3and8_bone_mapping = {
 	"rPinky3" : "f_pinky.03.R"
 	}
 	
-var makehuman_bone_mapping = {
+varvar makehuman_bone_mapping = {
 	"pelvis" : "pelvis",
 	
 	"abdomenLower" : "spine",
@@ -810,72 +1045,7 @@ var makehuman_bone_mapping = {
 	"rPinky3" : "pinky_03_r"
 	}
 	
-var mocaponline_bone_mapping = {
-	"hip" : "Hips",
 	
-	"abdomenLower" : "Spine",
-	"abdomenUpper" : "Spine1",
-	"chestLower" : "Spine2",
-	"neckLower" : "Neck",
-	"head" : "Head", 
 	
-	"lCollar" : "LeftShoulder",
-	"lShldrBend" : "LeftArm", 
-	"lForearmBend" : "LeftForeArm",
-	"lHand" : "LeftHand",
-
-	"rCollar" : "RightShoulder",
-	"rShldrBend" : "RightArm",
-	"rForearmBend" : "RightForeArm",
-	"rHand" : "RightHand",
-
-	"lThighBend" : "LeftUpLeg",
-	"lShin" : "LeftLeg",
-	"lFoot" : "LeftFoot", 
-	"lToe" : "LeftToeBase",
-
-	"rThighBend" : "RightUpLeg",
-	"rShin" : "RightLeg",
-	"rFoot" : "RightFoot", 
-	"rToe" : "RightToeBase",
-
-	"lThumb1" : "LeftHandThumb1",
-	"lThumb2" : "LeftHandThumb2",
-	"lThumb3" : "LeftHandThumb3",
-
-	"lIndex1" : "LeftHandIndex1",
-	"lIndex2" : "LeftHandIndex2",
-	"lIndex3" : "LeftHandIndex3",
-
-	"lMid1" : "LeftHandMiddle1",
-	"lMid2" : "LeftHandMiddle2",
-	"lMid3" : "LeftHandMiddle3",
-
-	"lRing1" : "LeftHandRing1",
-	"lRing2" : "LeftHandRing2",
-	"lRing3" : "LeftHandRing3",
-
-	"lPinky1" : "LeftHandPinky1",
-	"lPinky2" : "LeftHandPinky2",
-	"lPinky3" : "LeftHandPinky3",	
-
-	"rThumb1" : "RightHandThumb1",
-	"rThumb2" : "RightHandIndex2",
-	"rThumb3" : "RightHandIndex3",
-
-	"rIndex1" : "RightHandIndex1",
-	"rIndex2" : "RightHandIndex2",
-	"rIndex3" : "RightHandIndex3",
-
-	"rMid1" : "RightHandMiddle1",
-	"rMid2" : "RightHandMiddle2",
-	"rMid3" : "RightHandMiddle3",
-
-	"rRing1" : "RightHandRing1",
-	"rRing2" : "RightHandRing2",
-	"rRing3" : "RightHandRing3",
-
-	"rPinky1" : "RightHandPinky1",
-	"rPinky2" : "RightHandPinky2",
-	"rPinky3" : "RightHandPinky3"
-	}
+	
+	
